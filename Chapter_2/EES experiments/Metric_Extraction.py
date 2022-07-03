@@ -1,12 +1,8 @@
 import re
 import json
 
-# path = '/home/sanaz/Ryerson/Projects/Mode_Collapse/Code/EES_VARNet/logs/'
-# path = '/home/sanaz/Ryerson/Projects/VARNETEES/EES/logs/'
-path = '/home/sanaz/Ryerson/Projects/VARNETEES/EES/Main/logs/'
 
-# path = '/home/sanaz/Ryerson/Projects/Master_code/Main/logs/'
-# path = '/home/sanaz/Ryerson/Projects/VARNETEES/Synthetic_data/Old_logs/'
+path = '/home/Projects/VARNETEES/EES/Main/logs/'
 
 
 def get_digit(line):
@@ -30,9 +26,6 @@ def extract_config(files):
     model_structure =[]
     model_type =[]
     var_coef =[]
-    #   "mode_collapse": "VarGAN",
-    #   "model_structure": "Convolutional",
-    #   "model_type": "Vanilla",
     size = [] # Pixel_Full
     pac_num = [] # PacGAN_pacnum
     Time = []
@@ -72,23 +65,8 @@ def extract_config(files):
 
     return my_nums, level_line, slope, coef, mode_collapse,\
            model_structure, model_type, size, pac_num
-# 129, 135, 138
-# files = [126, 127, 128, 130, 131]
-# files = [132, 133, 134]
-# files = list(range(146,159))
-# files =  [146, 147, 149, 150, 151, 152, 153]
-# files = ['Cout_ring_MADGAN','Cout_ring_GDPP',
-#          'Cout_grid_36_MADGAN','Cout_grid_36_GDPP',
-#          'Cout_grid_25_MADGAN','Cout_grid_25_GDPP']
-# files = ['Sample_MADGAN_Conv_Vanilla']
-# files = [481, 484,490,491,492,493,495,496,498,499,501,502,504,505,507]
-# files = list(range(244, 249))
-# files = list(range(326, 331))
-files = list(range(341, 346))
-# files = list(range(346, 351))
 
-# files = [481, 484,490,491,492,493,495,496,498,499,
-#          501,502,504,505,507]
+files = list(range(341, 346))
 my_nums, level_line, slope, coef, mode_collapse,model_structure, model_type, size, pac_num = extract_config(files)
 accuracy_list = []
 modes_unique_list = []
@@ -113,20 +91,10 @@ for index_files, num in enumerate(files):
     for my_line in f:
         my_lines.append(my_line.rstrip('\n'))
     flag = 1
-    # for i in range(len(my_lines)):
-    #     if 'training finished' in my_lines[i]:
-    #         flag = 0
-    #         break
-    # if flag == 1:
-    #     Incorrect_files.append(num)
-    #     print('file', num, 'not correct')
-    #     continue
-
     for i in range(len(my_lines)):
 
         for num_epoch in range(1, 6):  # 40*1-1, ..., 40*9-1
-        # for num_epoch in range(1, 10):  # 40*1-1, ..., 40*9-1
-
+        
             indexes = []
             if 'Epoch: [' + str(num_epoch * 40 - 1) + '/250]' in my_lines[i]:  # results per 40 epochs
 
@@ -144,16 +112,6 @@ for index_files, num in enumerate(files):
                                 # print(my_lines[i + j])
                                 indexes.append(i+j)
 
-                        # if num_epoch == 1:
-                        #     indexes = [i + 12, i + 13, i + 53, i + 55]
-                        # elif num_epoch == 2:
-                        #     if 'accuracy_matrix out of 40000 quad' not in my_lines[i + 6]:
-                        #         indexes = [i + 6, i + 7, i + 47, i + 49]
-                        #     else:
-                        #         indexes = [i + 4, i + 5, i + 45, i + 47]
-                        #
-                        # else:
-                        #     indexes = [i + 4, i + 5, i + 45, i + 47]
                     elif size[index_files] == 19:
                         for j in range(60):
 
