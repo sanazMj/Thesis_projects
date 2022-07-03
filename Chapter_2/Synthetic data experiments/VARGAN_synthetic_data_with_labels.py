@@ -36,8 +36,7 @@ def my_config():
     test_noise_dim = 2000
     same_creation_type = 1
     minibatch_net = False
-    dir = '/home/sanaz/Ryerson/Projects/VARNETProject/Results/'
-
+    dir = '/home/Projects/VARNETProject/'
 @ex.automain
 def main(Model, Model_structure, Model_type, model_kind, mode_collapse, dataset, var_coef, pac_var, num_epochs, batch_size, training_samples, test_samples,
           num_runs,n_mixture, n_features, random_sample, discr_traing_rolls, test_noise_dim, pac_dim, dir, same_creation_type, minibatch_net):
