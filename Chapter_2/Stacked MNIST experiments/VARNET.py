@@ -38,7 +38,7 @@ def my_config():
     type_same = 2
     same = False
     num_condition = 10
-    dir = '/home/sanaz/Ryerson/Projects/VARNETProject/Results_MNIST/'
+    dir = '/home/Projects/VARNETProject/Results_MNIST/'
 @ex.automain
 def main(Model, Model_structure, Model_type, model_kind, mode_collapse, img_size, num_epochs, batch_size, num_training_sample, num_test_sample,
           num_runs, type_same,same , num_condition, n_features, discr_traing_rolls, pac_dim, var_pac, var_coef, dir,test_noise_dim):
@@ -57,10 +57,6 @@ def main(Model, Model_structure, Model_type, model_kind, mode_collapse, img_size
 
 
     train_loader_Stacked, prob =  load_data(batch_size, img_size)
-
-    # train_loader_Stacked, prob = load_data(num_training_sample, batch_size, img_size)
-    # print(prob)
-    # generator, discriminator, varnet, G_optimizer, D_optimizer, v_optimizer, loss, classifier = initialize_modelsnet_varnet(model_kind,img_size,  var_pac, pac_dim, n_features=100)
 
     train_hist = {}
     train_hist['D_losses'] = []
@@ -213,10 +209,7 @@ def main(Model, Model_structure, Model_type, model_kind, mode_collapse, img_size
         evaluation(100, 2000, generator, classifier, img_size, prob)
         print('test each  epoch on 2000')
 
-        # train_hist['D_losses'].append(torch.mean(torch.FloatTensor(D_losses)))
-        # train_hist['G_losses'].append(torch.mean(torch.FloatTensor(G_losses)))
-        # train_hist['V_losses'].append(torch.mean(torch.FloatTensor(V_losses)))
-        #
+
         train_hist['per_epoch_ptimes'].append(per_epoch_ptime)
         #
         if epoch >1 and epoch % 5 == 0:
