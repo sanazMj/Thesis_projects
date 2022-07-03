@@ -1,15 +1,9 @@
-# import matplotlib.pyplot as plt
 import numpy as np
-# import pandas as pd
-# import os
-path = '/home/sanaz/Ryerson/Projects/VARNETProject/Stacked_MNIST/logs/'
-# files =[154,155,156]
-# files = [146,147]
+
+path = '/home/Projects/VARNETProject/Stacked_MNIST/logs/'
+
 files = list(range(251,259))
 
-
-
-# files=  [194,195,196, 204, 205]
 num_modes_list= []
 kl_list =[]
 loss_d_list = []
@@ -17,8 +11,7 @@ loss_g_list = []
 loss_v_list = []
 Inception_mean_list =[]
 Inception_std_list =[]
-# [1/50] - ptime: 131.35, loss_d: 0.620, loss_g: 5.522, loss_v: 1.095
-# [1/50] - ptime: 107.29, loss_d: 0.571, loss_g: 4.958
+
 for num in files:
     num_modes = []
     kl = []
@@ -82,7 +75,7 @@ for num in files:
     Inception_mean_list.append(inception_mean)
     Inception_std_list.append(inception_std)
 
-#
+
 print(num_modes_list)
 print(kl_list)
 print(loss_d_list)
@@ -90,4 +83,3 @@ print(loss_g_list)
 print(loss_v_list)
 print(Inception_mean_list)
 print(Inception_std_list)
-# print(np.array([num_modes_list,num_modes_thresh_list,kl_thresh_list,KL_Score_thresh_list,KL_non_thresh_list,KL_Score_no_thresh_list,High_quality_samples_list]))
