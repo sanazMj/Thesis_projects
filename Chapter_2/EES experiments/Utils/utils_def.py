@@ -55,48 +55,7 @@ def make_label(size , value, gen_n):
     return data.cuda()
 
 
-# def compute_diversity_loss_tf(phi_fake, phi_real):
-#     phi_fake = phi_fake.cpu().detach().numpy()
-#     phi_fake = tf.convert_to_tensor(phi_fake)
-#
-#     phi_real = phi_real.cpu().detach().numpy()
-#     phi_real = tf.convert_to_tensor(phi_real)
-#
-#     # phi_fake = tf.Tensor(phi_fake, dtype=tf.float64)
-#     # phi_real = tf.Tensor(phi_real, dtype=tf.float64)
-#
-#     def compute_diversity_tf(phi):
-#         phi = tf.nn.l2_normalize(phi, 1)
-#         Ly = tf.tensordot(phi, tf.transpose(phi), 1)
-#         eig_val, eig_vec = tf.linalg.eigh(Ly)
-#         return eig_val, eig_vec
-#
-#     def normalize_min_max_tf(eig_val):
-#         return tf.math.divide(tf.math.subtract(eig_val, tf.math.reduce_min(eig_val)),
-#                       tf.math.subtract(tf.math.reduce_max(eig_val), tf.math.reduce_min(eig_val)))  # Min-max-Normalize Eig-Values
-#
-#     fake_eig_val, fake_eig_vec = compute_diversity_tf(phi_fake)
-#     # print('Done')
-#     real_eig_val, real_eig_vec = compute_diversity_tf(phi_real)
-#     # print('Done')
-#
-#     # Used a weighing factor to make the two losses operating in comparable ranges.
-#     eigen_values_loss = 0.0001 * tf.compat.v1.losses.mean_squared_error(labels=real_eig_val, predictions=fake_eig_val)
-#     # print('Done')
-#     eigen_vectors_loss = -tf.math.reduce_sum(tf.multiply(fake_eig_vec, real_eig_vec), 0)
-#     # print('Done')
-#     normalized_real_eig_val = normalize_min_max_tf(real_eig_val)
-#     # print('Done')
-#     weighted_eigen_vectors_loss = tf.math.reduce_sum(tf.math.multiply(normalized_real_eig_val, eigen_vectors_loss))
-#     # print('Done reduce_sum')
-#     # print(eigen_values_loss)
-#     result = tf.cast(eigen_values_loss, tf.float32) + weighted_eigen_vectors_loss
-#     # print('result', result)
-#
-#     # result = torch.tensor(result)
-#     # print('result', result)
-#
-#     return result
+
 
 def compute_diversity_loss(phi_fake, phi_real):
     def compute_diversity(phi):
@@ -139,51 +98,6 @@ def convert_tuple_binary_to_int(input_tuple):
     for i in range(len(input_tuple)):
         temp += str(int(input_tuple[i]))
     return temp
-
-
-def oct2array(octList, even_flag=False, side=None):
-    """converts list of octant values to square array,
-    size is determined by length of the octant values and the even_flag
-    """
-    if side is None:
-        side = parDim2side(len(octList), even_flag=even_flag)
-    c1 = side // 2
-    c2 = int((side + 1) // 2)
-
-    # mask=np.concatenate(([np.concatenate((np.zeros(side-1-k),np.ones(k+1))) for k in range(c2)],np.zeros((c1,r))))
-    return np.concatenate(([np.concatenate(
-        (np.zeros(side - 1 - k), octList[(k * (k + 1)) // 2:((k + 2) * (k + 1)) // 2])) for k in range(c2)],
-                           np.zeros((c1, side))))
-
-
-def eightfold_sym2(array_in):
-    """produces array with 8 fold symmetry based on the contents of the first octant of  array_in
-    Added support for even length sides
-    """
-    array = array_in.copy()
-    r = array.shape[0]
-    c1 = r // 2
-    c2 = (r + 1) // 2
-
-    mask = np.concatenate(
-        ([np.concatenate((np.zeros(r - 1 - k), np.ones(k + 1))) for k in range(c2)], np.zeros((c1, r))))
-
-    marray = array * mask
-    # print(marray)
-    marray += np.rot90(np.rot90(np.transpose(marray)))
-    for k in range(c2):
-        marray[c2 - 1 - k, c1 + k] /= 2
-    # print(marray)
-    marray += np.fliplr(marray)
-    if np.mod(r, 2) == 1:
-        for k in range(c2):
-            marray[k, c2 - 1] /= 2
-        # print(marray)
-    marray += np.flipud(marray)
-    if np.mod(r, 2) == 1:
-        for k in range(r):
-            marray[c2 - 1, k] /= 2
-    return marray
 
 
 def create_sim_data(imgs, pixel, batch_size, Labels_classify, n_mixture, type=0, Level_line=0.5, Coef=1, slope=5):
@@ -280,26 +194,4 @@ class ModelSwitcher:
     def True_19_Conditional_ConvOriginal(self):
         from EES.Main.Models.Partial_image.len_19.Model_19_Partial_cCGAN_Original import initialize_models
         return self.initializer(initialize_models)
-    # elif Model_type == 'Vanilla' and Model_structure == 'FF' and num_hidden_layers == 2:
-    #     from Models.Model_FF_Vanilla import initialize_models
-    #     # from train import train_discriminator, train_generator, train_varmeter
-    # elif Model_type == 'Conditional' and Model_structure == 'FF' and num_hidden_layers == 2:
-    #     from Models.Model_FF_Conditional import initialize_models
-
-    # if (Pixel_Full == 19 or Pixel_Full == 9) and (
-    #         model_structure == 'Convolutional' or model_structure == 'ConvOriginal'):
-    #     generator, discriminator, varmeter, g_optimizer, d_optimizer, varmeter_optimizer, loss = initialize_models(
-    #         channels, Channel_factor, Kernel_factor, zdim, dataset_num_condition,
-    #         dataset_num_pixels, Minibatch, minibatch_kind, Pack_number, PacGAN_pacnum)
-    #     loss_dict = {}
-    #     loss_dict['BCE'] = loss
-    # elif model_structure == 'FF':
-    #     generator, discriminator, varmeter, g_optimizer, d_optimizer, varmeter_optimizer, loss = initialize_models(
-    #         dataset_num_features, dataset_num_condition, dataset_num_pixels, ndf, ngf, zdim, minibatch_net,
-    #         Pack_number, PacGAN_pacnum)
-    #     loss_dict = {}
-    #     loss_dict['BCE'] = loss
-    # else:
-    #     generator, discriminator, g_optimizer, d_optimizer, loss_dict = initialize_models(Model, model_structure,
-    #                                                                                       model_type, full_image,
-    #                                                                                       Pixel_Full, Losses, args)
+   
