@@ -31,29 +31,6 @@ from Evaluation import check_files_convexity
 ex = Experiment('test')
 ex.observers.append(FileStorageObserver.create('logs'))
 
-
-def calc_gradient_penalty(model, x, x_gen, w=10):
-    LAMBDA = 10
-    _eps = 1e-15
-    """WGAN-GP gradient penalty"""
-    assert x.size()==x_gen.size(), "real and sampled sizes do not match"
-    alpha_size = tuple((len(x), *(1,)*(x.dim()-1)))
-    alpha_t = torch.cuda.FloatTensor if x.is_cuda else torch.Tensor
-    alpha = alpha_t(*alpha_size).uniform_()
-    x_hat = x.data*alpha + x_gen.data*(1-alpha)
-    x_hat = Variable(x_hat, requires_grad=True)
-
-    def eps_norm(x):
-        x = x.view(len(x), -1)
-        return (x*x+_eps).sum(-1).sqrt()
-    def bi_penalty(x):
-        return (x-1)**2
-
-    grad_xhat = torch.autograd.grad(model(x_hat).sum(), x_hat, create_graph=True, only_inputs=True)[0]
-
-    penalty = w*bi_penalty(eps_norm(grad_xhat)).mean()
-    return penalty
-
 @ex.config
 def my_config():
 
@@ -83,8 +60,8 @@ def my_config():
     learning_rate_g = 0.0002#0.0002
     learning_rate_d = 0.0002
     target_points = 7 # Center + r/2 on each axis
-    Data_path = '/home/sanaz/Ryerson/Projects/tumorGAN/Data/'
-    save_path = '/home/sanaz/Ryerson/Projects/tumorGAN/GAN_simple_3D/'
+    Data_path = '/home/Projects/tumorGAN/Data/'
+    save_path = '/home/Projects/tumorGAN/GAN_simple_3D/'
     step_report = 100
     name_choice = ''
     sofSparsity = False
@@ -110,7 +87,7 @@ def main(space_dim, name_choice, cuda_device, latent_dim, pac_num, dataset_kind,
 
 
     if dataset_kind == 'Matlab':
-        data_file = h5py.File('/home/sanaz/Ryerson/Projects/tumor_Matlab/Data/Sphere_one_tumor_Feb_28_GCP/' +
+        data_file = h5py.File('/home/Projects/tumor_Matlab/Data/Sphere_one_tumor_Feb_28_GCP/' +
                               'Dataset_' + 'MATLAB_isocenter' + '_len' + str(40000) + '.h5', 'r')
         if target_points == 7:
             target_points = target_points_max
@@ -282,8 +259,6 @@ def main(space_dim, name_choice, cuda_device, latent_dim, pac_num, dataset_kind,
                 count_z = 10000
             z = Variable(Tensor(np.random.normal(0, 1, (count_z, noise_dim))))
             fake_imgs = G(z)
-            dir = '/home/sanaz/Ryerson/Projects/tumorGAN/GAN_simple_3D/results/'
-
 
             if dataset_include_tumor:
 
@@ -291,7 +266,7 @@ def main(space_dim, name_choice, cuda_device, latent_dim, pac_num, dataset_kind,
 
             else:
                 result_dict = GAN_3D_iso_sphere_full_evaluation(fake_imgs, target_points,dataset_include_tumor,dimension)
-            torch.save(G, dir + 'generator_' + 'epoch_' + str(epoch) + 'id_' + str(id) + '.pt')
+            torch.save(G, save_dir + 'generator_' + 'epoch_' + str(epoch) + 'id_' + str(id) + '.pt')
             logger.log_metrics(ex, result_dict, epoch)
 
            
