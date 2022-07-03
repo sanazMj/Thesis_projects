@@ -111,39 +111,3 @@ files_epoch = [100,200] #list(range(0,num_epoch, step_report)) + [num_epoch-1]
 name_data = 'Matlab'
 check_tumor(ids, files_epoch, name_data, dir=dir,save_omega=True)
 
-# check_tumor_iso(ids, files_epoch, dataset_include_tumor,name_data, dir)
-# iterations_list = list(range(9))
-# eval_files_sphere_filled(ids, dir, 'name_save', iterations_list=iterations_list, step_report=step_report, target_points=7,
-#                          dataset_include_tumor=True, save=False)
-# files_epoch =  list(range(0,num_epoch, step_report))
-# check_tumor_iso(ids, True, files_epoch, dir=dir)
-# check_tumor(ids, files_epoch, name_data, dir=dir,save_omega=False)
-# epoch_k = []
-# # epoch_k =[]
-# step_report = 100
-# dataset_include_tumor = False
-# # eval_files_sphere_filled(files, dir, name_save,  iterations_list=epoch_k, step_report=step_report,target_points=1, dataset_include_tumor=False, save=True)
-# ids = [127,128] #leval_files_sphere_filledist(range(126,129)) #[123]
-# files_epoch = list(range(0,801, step_report))
-# Dir_new = 'Colab_7isos'
-# file_names = [dir + Dir_new+'/' +'result_dict_epoch' + str(k) + '.pkl' for k in files_epoch]
-# for id in ids:
-#     file_names = [dir + str(id)+'/' +'result_dict_epoch' + str(k) + '.pkl' for k in files_epoch]
-#     for file in file_names:
-#         print(file)
-#         check_files_convexity(file, id_name=str(id))
-# ids = [144,145]
-# files_epoch = list(range(0,600, step_report)) + [599]
-# for id in ids:
-#     file_names = [dir + str(id)+'/' +'result_dict_epoch' + str(k) + '.pkl' for k in files_epoch]
-#     for file in file_names:
-#         print(file)
-#         check_files_convexity(file)
-# file = '/home/sanaz/Ryerson/Projects/tumorGAN/GAN_simple_3D/logs/Ata_logs/5/'+'/' +'result_dict_epoch' + str(100) + '.pkl'
-# print(file)
-# check_files_convexity(file)
-# for id in ids:
-#     file_names = [dir + str(id) + '/' + 'result_dict_epoch' + str(k) + '.pkl' for k in files_epoch]
-#     # for file in file_names:
-#     #     print(file)
-#     check_files_sphere_filled_iso(file_names)
