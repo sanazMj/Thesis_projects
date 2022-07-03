@@ -12,55 +12,6 @@ from torch.autograd import Variable
 
 torch.cuda.is_available()
 
-#
-# # %%
-#
-# class Net(nn.Module):
-#     def __init__(self):
-#         super(Net, self).__init__()
-#
-#         self.Conv1 = nn.Sequential(
-#             nn.Conv2d(1, 64, kernel_size=5, padding=2, stride=2),
-#             nn.LeakyReLU()
-#         )
-#         self.Conv2 = nn.Sequential(
-#             nn.Conv2d(64, 128, kernel_size=5, padding=2, stride=2),
-#             nn.BatchNorm2d(128),
-#             nn.LeakyReLU()
-#         )
-#         self.Conv3 = nn.Sequential(
-#             nn.Conv2d(128, 256, kernel_size=5, padding=2, stride=2),
-#             nn.BatchNorm2d(256),
-#             nn.LeakyReLU()
-#         )
-#         self.Conv4 = nn.Sequential(
-#             nn.Conv2d(256, 512, kernel_size=5, padding=2, stride=2),
-#             nn.LeakyReLU()
-#         )
-#         self.Linear1 = nn.Sequential(
-#             nn.Linear(2 * 2 * 512, 1),
-#             nn.BatchNorm1d(1)
-#         )
-#
-#     def forward(self, x):
-#         # print(x.shape)
-#         x = self.Conv1(x)
-#         # print(x.shape)
-#         x = self.Conv2(x)
-#         # print(x./shape)
-#
-#         x = self.Conv3(x)
-#         # print(x.shape)
-#         x = self.Conv4(x)
-#         # print(x.shape)
-#         x = x.reshape(-1, 512 * 2 * 2)
-#         # print(x.shape)
-#         x = self.Linear1(x)
-#         # print(x.shape)
-#         x = F.log_softmax(x, dim=1)
-#         return x
-#
-#     # %%
 
 
 class Net(nn.Module):
@@ -120,42 +71,6 @@ test_loader = torch.utils.data.DataLoader(
     datasets.MNIST('data', train=False, download=True, transform=transform),
     batch_size=batch_size, shuffle=True)
 
-# # Binary MNIST Train data
-# index = 0
-# binarized_train_data = []
-# for  x_, y_ in (train_loader):
-
-#         if index == 0:
-#           binarized_input = binarize_images(x_)
-#           label = y_
-#           index+=1
-#         else:
-#           label = torch.cat([label,y_],0)
-#           binarized_input = torch.cat([binarized_input, binarize_images(x_)],0)
-
-# binarized_train_data =torch.utils.data.TensorDataset( binarized_input, label)
-
-# train_loader_binarized =  torch.utils.data.DataLoader(binarized_train_data, batch_size =batch_size ,shuffle=True)
-
-# # Binary MNIST Test data
-# index = 0
-# binarized_test_data = []
-# for  x_, y_ in (test_loader):
-
-#         if index == 0:
-#           binarized_input = binarize_images(x_)
-#           label = y_
-#           index+=1
-#         else:
-#           label = torch.cat([label,y_],0)
-#           binarized_input = torch.cat([binarized_input, binarize_images(x_)],0)
-
-# binarized_test_data =torch.utils.data.TensorDataset( binarized_input, label)
-
-# test_loader_binarized =  torch.utils.data.DataLoader(binarized_test_data, batch_size =batch_size ,shuffle=True)
-
-# %%
-
 classifier = Net()
 classifier.cuda()
 
@@ -198,7 +113,7 @@ print('Finished Training')
 
 # %%
 
-torch.save(classifier.state_dict(), '/home/sanaz/Ryerson/Projects/GAN_Main_Project/VARNET_MNIST/class_dict.pt')
+torch.save(classifier.state_dict(), '/home/Ryerson/Projects/GAN_Main_Project/VARNET_MNIST/class_dict.pt')
 
 # %%
 
