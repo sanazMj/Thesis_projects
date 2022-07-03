@@ -103,25 +103,14 @@ def main(Model, Model_structure, Model_type, model_kind, mode_collapse, dataset,
 
                 real_data_reshape_list, total_label_diff = create_dif_data(real_data, pac_var, batch_size, type=same_creation_type)
 
-                # real_data_reshape = real_data.reshape(real_data.shape[0] // pac_var, real_data.shape[1] * pac_var).cuda()
                 real_data_reshape_dim = real_data.reshape(real_data.shape[0] // pac_dim, real_data.shape[1] * pac_dim).cuda()
                 fake_data_reshape_dim = fake_data.reshape(fake_data.shape[0] // pac_dim, fake_data.shape[1] * pac_dim).cuda()
 
 
-                # fake_data_same = imgs[0, :]
-                # fake_data_same = fake_data_same.repeat(real_data.shape[0], 1)
-                # fake_data_same_reshape = fake_data_same.reshape(fake_data_same.shape[0] // pac_var,fake_data_same.shape[1] * pac_var)
-                # fake_data_same_reshape = fake_data_same_reshape.cuda()
-
                 d_error_batch, pred_real, pred_fake = train_discriminator(d_optim, discriminator, criterion, real_data_reshape_dim, fake_data_reshape_dim)
                 d_error += d_error_batch
 
-                # real_data_reshape = create_dif_data(trainset, labels_training)
-                # print(real_data_reshape.shape)
-                # real_data_reshape = real_data_reshape.reshape(real_data_reshape.shape[0] // pac_var, real_data_reshape.shape[1] * pac_var).cuda()
-
-                # v_error_batch, pred_train, pred_same = train_varnet(v_optim, varnet, criterion, real_data_reshape, fake_data_same_reshape)
-                # print('Sim data')
+             
 
                 v_error_batch, pred_train, pred_same = train_varnet(v_optim, varnet, criterion, real_data_reshape_list,total_label_diff, real_data , num_var, pac_var, batch_size, n_mixture,Label_images, random_sample, same_creation_type)
                 # print(pred_train, pred_same)
@@ -138,9 +127,6 @@ def main(Model, Model_structure, Model_type, model_kind, mode_collapse, dataset,
             # print(var_coef_change)
             g_error_batch, pred_d, pred_v = train_generator_varnet(g_optim, discriminator, varnet, criterion, var_coef_change, pac_var, fake_data_dim, fake_data1,label1, same_creation_type=same_creation_type)
             g_error += g_error_batch
-
-        # num_mode, KL, JSD_score, KL_nonthresh, JSD_score_nonthresh, high_quality_samples = evaluate_modes_reverse_KL(
-        #     generator, 1000, q, q_without_thresh, n_mixture, tensor_loc, label, std_dev=std_dev)
 
         g_losses.append(g_error / i)
         d_losses.append(d_error / i)
@@ -161,17 +147,6 @@ def main(Model, Model_structure, Model_type, model_kind, mode_collapse, dataset,
             plt.scatter(trainset[:, 0], trainset[:, 1], c='b', edgecolor='none')
             plt.scatter(img[:, 0], img[:, 1], c='g', edgecolor='none')
             plt.savefig(dir + '/Images/id_' + str(id) +'_epoch_'+ str(epoch) + '.png')
-            # torch.save(generator.state_dict(), dir + '/Models/generator_' + str(id)+'.pt')
-
-            # imgs = [np.array(to_image(i)) for i in images]
-            # imageio.mimsave('progress.gif', imgs)
-            # plt.figure()
-            # plt.plot(g_losses, label='Generator_Losses')
-            # plt.plot(d_losses, label='Discriminator Losses')
-            # plt.plot(v_losses, label='VARNET Losses')
-            # plt.legend()
-            # plt.savefig(dir + '/Loss_images/Id_' + str(id)+'_epoch_'+ str(epoch) + '.png')
-            # plt.savefig('loss.png')
 
             # Evaluate
             num_mode, KL, JSD_score, KL_nonthresh, JSD_score_nonthresh, high_quality_samples = evaluate_modes_reverse_KL(
