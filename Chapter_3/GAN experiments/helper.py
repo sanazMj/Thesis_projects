@@ -35,6 +35,28 @@ from discrete_frechet_master.distances.discrete import euclidean
 
 from constants import Constant_dict, Constant_dict_keys
 
+def calc_gradient_penalty(model, x, x_gen, w=10):
+    LAMBDA = 10
+    _eps = 1e-15
+    """WGAN-GP gradient penalty"""
+    assert x.size()==x_gen.size(), "real and sampled sizes do not match"
+    alpha_size = tuple((len(x), *(1,)*(x.dim()-1)))
+    alpha_t = torch.cuda.FloatTensor if x.is_cuda else torch.Tensor
+    alpha = alpha_t(*alpha_size).uniform_()
+    x_hat = x.data*alpha + x_gen.data*(1-alpha)
+    x_hat = Variable(x_hat, requires_grad=True)
+
+    def eps_norm(x):
+        x = x.view(len(x), -1)
+        return (x*x+_eps).sum(-1).sqrt()
+    def bi_penalty(x):
+        return (x-1)**2
+
+    grad_xhat = torch.autograd.grad(model(x_hat).sum(), x_hat, create_graph=True, only_inputs=True)[0]
+
+    penalty = w*bi_penalty(eps_norm(grad_xhat)).mean()
+    return penalty
+
 
 def plot_trisurf_matlab(points):
     '''
@@ -355,7 +377,7 @@ def get_points_from_matrix(temp,condition=1, dim_count=3):
 
 
 def visualize_multi_colored_isos_edited(temp,name, epoch, id,views, lim, set_lim=False, save=False,
-                     dir='/home/sanaz/Ryerson/Projects/TumorGAN/GAN_3D/3D_chair_results/'):
+                     dir='/home/Projects/TumorGAN/GAN_3D/3D_chair_results/'):
     '''
     Save or plot the scatter 3D of an image from different views
     :param temp: input matrix
@@ -402,7 +424,7 @@ def visualize_multi_colored_isos_edited(temp,name, epoch, id,views, lim, set_lim
             plt.show()
 
 def visualize_multi_colored_isos_one_image(temp,name, epoch, id,views, lim, x_lim_fig=5, y_lim_fig=10,set_lim=False, voxel=False, trisurf=False, save=False, add_tumor=False,
-                     dir='/home/sanaz/Ryerson/Projects/TumorGAN/GAN_3D/3D_chair_results/'):
+                     dir='/home/Projects/TumorGAN/GAN_3D/3D_chair_results/'):
     '''
       Save or plot the scatter/voxel/trisurf 3D of an image from different views
       :param temp: input matrix
@@ -496,7 +518,7 @@ def visualize_multi_colored_isos_one_image(temp,name, epoch, id,views, lim, x_li
             plt.show()
 
 def visualize_multi_colored_isos(temp,name, epoch, id,views, lim, x_lim_fig=5, y_lim_fig=10,set_lim=False, voxel=False, trisurf=False, save=False, add_tumor=False,
-                     dir='/home/sanaz/Ryerson/Projects/TumorGAN/GAN_3D/3D_chair_results/'):
+                     dir='/home/Projects/TumorGAN/GAN_3D/3D_chair_results/'):
     # rs = np.random.rand(len(np.unique(temp)), 3)
     colors_list = ['r','g','b','c', 'm', 'y', 'k', 'navy', 'coral', 'cyan', 'springgreen', 'lightgray']
     count = len(np.unique(temp))
@@ -579,7 +601,7 @@ def visualize_multi_colored_isos(temp,name, epoch, id,views, lim, x_lim_fig=5, y
             plt.show()
 
 def visualize_3d_obj(temp, epoch, id, set_lim=True, lim=[70,70,70],save=False,
-                     dir='/home/sanaz/Ryerson/Projects/TumorGAN/GAN_3D/3D_chair_results/'):
+                     dir='/home/Projects/TumorGAN/GAN_3D/3D_chair_results/'):
     points = get_points_from_matrix(temp, 1)
     ax = plt.axes(projection='3d')
     if len(points) > 0:
@@ -633,7 +655,7 @@ def visualize_3d(temp, epoch=0, id=0, set_lim = False, lim=[240,240,160],conditi
             plt.savefig(dir + str(epoch) + '_' + str(id) + '.png')
         else:
             plt.show()
-def visualize_tumor_3d(xline, yline, zline, epoch=0, id=0, set_lim = False, lim=[240,240,160], color='Greens',save=False,dir='/home/sanaz/Ryerson/Projects/TumorGAN/GAN_Simple_3D_shape_tumor/Results/'):
+def visualize_tumor_3d(xline, yline, zline, epoch=0, id=0, set_lim = False, lim=[240,240,160], color='Greens',save=False,dir='/home/Projects/TumorGAN/GAN_Simple_3D_shape_tumor/Results/'):
     ax = plt.axes(projection='3d')
     ax.scatter3D(xline, yline, zline, color=color)
     # ax.plot_surface(xline, yline, zline)
