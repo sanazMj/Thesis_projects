@@ -64,18 +64,6 @@ def main(batch_size, channels, n_critic,
     logger = Logger(model_name='DCGAN_{}'.format(id), data_name='EES', id=id, image_size=full_image,
                     model_type=model)
 
-    # if mode_collapse == 'PacGAN' or mode_collapse == 'VarGAN':
-    #     Pack_number = Pack_num
-    # else:
-    #     Pack_number = 1
-
-    # if Model in ['Normal', 'Complex']:
-    #     from Training.train import train_discriminator, train_generator, train_varmeter
-    # if mode_collapse == 'Minibatch' and model_structure == 'FF':
-    #     minibatch_net = MinibatchDiscrimination(ndf // 4, ndf // 8, 5, Minibatch_kind='L1 Norm')
-    #     minibatch_net.cuda()
-    # if mode_collapse != 'Minibatch':
-    #     minibatch_net = False
     pixel = Pixel_Full if full_image else Pixel_Partial
     minibatch_net = False if mode_collapse != 'Minibatch' else True
 
@@ -124,20 +112,7 @@ def main(batch_size, channels, n_critic,
                                                       labels.shape[1] * Pack_number)
 
                 if model_structure == 'Convolutional' or model_structure == 'ConvOriginal':
-                    # batch_VAR_label = labels[0, :]
-                    # batch_VAR_label = torch.tensor(np.stack([np.tile(batch_VAR_label.cpu(), (pixel, pixel, 1)) for i in range(labels.shape[0])]))
-                    # print(batch_VAR_label.shape)
-                    # batch_VAR_label = batch_VAR_label.reshape(int(batch_VAR_label.shape[0] / Pack_number),
-                    #                                            batch_VAR_label.shape[1], batch_VAR_label.shape[2],
-                    #                                            batch_VAR_label.shape[3] * Pack_number)
-                    #
-                    #
-                    # batch_VAR = real_batch[0, :]
-                    # batch_VAR = batch_VAR.repeat(real_batch.shape[0], 1)
-                    # batch_VAR = batch_VAR.reshape(int(batch_VAR.shape[0] / Pack_number),
-                    #                               batch_VAR.shape[1] * Pack_number)
-                    # Create similar data using sim function
-                    # print(real_batch.shape, labels.shape)
+                  
                     batch_VAR, batch_VAR_label, label_target = create_sim_data(real_batch, pixel,
                                                                                batch_size, labels, n_mixture,
                                                                                type=same_creation_type,
@@ -219,17 +194,10 @@ def main(batch_size, channels, n_critic,
                 Disc_Labels_VARGAN = Disc_Labels.reshape(int(Disc_Labels.shape[0] / Pack_number),
                                                          Disc_Labels.shape[1] * Pack_number)
 
-            # print(time.time())
-            # fake_data = generator(noise(real_data.size(0), zdim), labels_List)
-            # Train D
-
-            # print(time.time())
-            # d_error, d_pred_real, d_pred_fake = train_discriminator(discriminator,loss_d,d_optimizer,
-            #                                                         real_data, fake_data, labels_List)
-            # print('Disc', real_data1.shape,fake_data.shape,Disc_Labels_PacGAN.shape)
+           
             d_error, d_pred_real, d_pred_fake = train_discriminator(discriminator, loss, d_optimizer,
                                                                     real_data1, fake_data, Disc_Labels_PacGAN)
-            # print('Disc', batch_VAR_label.shape, Disc_Labels_reshaped.shape)
+           
 
             var_error, var_pred_real, var_pred_fake = train_varmeter(varmeter, loss, varmeter_optimizer,
                                                                      real_data, batch_VAR, Disc_Labels_VARGAN,
@@ -259,63 +227,24 @@ def main(batch_size, channels, n_critic,
                                                                           fake_data_PacGAN, z_noise, fake_data_VARGAN,
                                                                           Disc_Labels_PacGAN, Disc_Labels_VARGAN,
                                                                           mode_collapse, var_coef)
-                # print('train_g')
-
-            # fake_data = generator(noise(real_batch.size(0)), labels_List)
-            # Train G
-            # print(time.time())
-            # g_error = train_generator(discriminator,loss_g, g_optimizer, fake_data, labels_List)
-            #         print('train g,',time.time())
-            # Log error
-
-            # Log error
-            # print(time.time())
+             
             logger.log(d_error, g_error, epoch, n_batch, dataset['num_batches'])
 
-            # Model Checkpoints
-            #         logger.save_models(generator, discriminator, epoch)
-
-            # Check the test samples
-        # test_images = generator(test_noise, labels_of_test_noise).data.cpu().numpy()
-        # test_images = np.where(test_images > 0.5, 1, 0)  # convert to binary output
-        # # test_images = np.where(test_images > 0, 1, 0)  # convert to binary output
-        #
-        # conditioned_labels, lookup_labels, lookup_labels_quad, num_unknowns = predict_test_samples(
-        #     test_images,
-        #     labels_of_test_noise,
-        #     categorization,
-        #     pixel_to_label,
-        #     full_image, pixel, Quarter_fill)
-        # accuracy_matrix, class_accuracies, accuracy_matrix_quad, class_accuracies_quad, accuracy_matrix_without_unknowns, class_accuracies_without_unknowns, accuracy_matrix_without_unknowns_quad, class_accuracies_without_unknowns_quad = create_accuracy_matrix(
-        #     dataset['num_condition'], conditioned_labels,
-        #     lookup_labels, lookup_labels_quad, cat_names)
+            
         if epoch % 40 == 0 and epoch > 1:
             save_generation_distribution(ex, epoch, categorization, cat_names, generator, pixel_to_label,
                                          dataset['num_condition'], full_image, pixel, Quarter_fill, zdim,
                                          plot_generated_distribution=False)
-            # evaluate_generation_distribution(ex, epoch, test_images, categorization, cat_names, generator,
-            #                                  pixel_to_label,
-            #                                  dataset['num_condition'], full_image, pixel, Quarter_fill, zdim,
-            #                                  accuracy_matrix, class_accuracies, accuracy_matrix_quad,
-            #                                  class_accuracies_quad, accuracy_matrix_without_unknowns,
-            #                                  accuracy_matrix_without_unknowns_quad,
-            #                                  conditioned_labels, lookup_labels, lookup_labels_quad, num_unknowns,
-            #                                  plot_generated_distribution=False)
-
+           
         logger.display_status(epoch, num_epochs, n_batch, dataset['num_batches'], d_error, g_error, var_error,
                               d_pred_real,
                               d_pred_fake, var_pred_real, var_pred_fake, gprediction_d, gprediction_var)
 
-        # if n_batch % dataset['num_batches'] == 0:
-        #     # logger.save_images(test_images, conditioned_labels, lookup_labels, epoch, full_image,partial_2fold,pixel)
+       
         if epoch == num_epochs - 1 and pixel_to_label:
             print('training finished')
-            # utils.save_generation_distribution(ex, epoch, categorization, generator, pixel_to_label)
+           
             save_generation_distribution(ex, epoch, categorization, cat_names, generator, pixel_to_label,
                                          dataset['num_condition'], full_image, pixel, Quarter_fill, zdim,
                                          plot_generated_distribution=True)
-            # logger.display_status(epoch, num_epochs, n_batch, 256, d_error, g_error, var_error, d_pred_real,
-            #                       d_pred_fake, var_pred_real, var_pred_fake, gprediction_d, gprediction_var)
-            break
-        # logger.log_metrics(ex, class_accuracies, class_accuracies_quad, class_accuracies_without_unknowns,
-        #                    class_accuracies_without_unknowns_quad, epoch, num_unknowns)
+         
