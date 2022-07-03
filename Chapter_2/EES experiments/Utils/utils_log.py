@@ -11,7 +11,6 @@ from sklearn.metrics import roc_curve, confusion_matrix, precision_recall_curve,
 import pickle
 from collections import defaultdict
 import time
-from Utils.population_generator_utils import edges_connect2
 from Utils.utils_def import *
 from Utils.utils_image_edit import *
 class Logger:
@@ -211,16 +210,7 @@ class Logger:
         torch.save(discriminator.state_dict(),
                    '{}/D_epoch_{}'.format(out_dir, epoch))
 
-    # def log_metrics(self, ex, class_accuracies, epoch, total_unknowns_Hp = None, total_unknowns_Lp = None):
-    #     for name, accuracy in class_accuracies.items():
-    #         self.writer.add_scalar('{}/{}'.format(self.comment, name), accuracy, epoch)
-    #         ex.log_scalar(name, accuracy, epoch)
-    #     if total_unknowns_Hp:
-    #         self.writer.add_scalar('{}/{}'.format(self.comment, 'unknowns_HP'), total_unknowns_Hp, epoch)
-    #         ex.log_scalar('unknowns_HP', total_unknowns_Hp, epoch)
-    #     if total_unknowns_Lp:
-    #         self.writer.add_scalar('{}/{}'.format(self.comment, 'unknowns_LP'), total_unknowns_Lp, epoch)
-    #         ex.log_scalar('unknowns_LP', total_unknowns_Lp, epoch)
+   
     def log_metrics(self, ex, class_accuracies, class_accuracies_quad, class_accuracies_without_unknowns,
                     class_accuracies_without_unknowns_quad, epoch, total_unknowns=None):
         print('Logging metrics')
@@ -429,49 +419,6 @@ def check_for_mode_collapse(accuracy_matrix):
         print('Accuracy matrix: ', accuracy_matrix, '\n')
 
 
-# def predict_test_samples(test_images, labels_of_test_noise, categorization, pixel_to_label):
-#     total_unknowns_Hp = 0
-#     total_unknowns_Lp = 0
-#     conditioned_labels = np.argmax(labels_of_test_noise.cpu().numpy(), axis=1)  # Conditioned on
-#     if categorization == 2:
-#         # True labels found by lookup since we have all the search space
-#         lookup_labels = []
-#         for index, image in enumerate(test_images):
-#             image = image.reshape((image.shape[0], -1)).astype(int)
-#             image = image[0]
-#             if tuple(image) in pixel_to_label:
-#                 lookup_labels.append(np.argmax(pixel_to_label[tuple(image)]))
-#             else:
-#                 lookup_labels.append('unknown')
-#                 if conditioned_labels[index] == 0:
-#                     total_unknowns_Hp += 1
-#                 else:
-#                     total_unknowns_Lp += 1
-#
-#
-#         return conditioned_labels, lookup_labels, total_unknowns_Hp,total_unknowns_Lp
-#
-# def create_accuracy_matrix(conditioned_labels, lookup_labels):
-#     ## TODO Update function for n number of unique labels
-#     conf_matrix = np.zeros((2,2))
-#     for conditioned_label, lookup_label in zip(conditioned_labels, lookup_labels):
-#         if lookup_label == 'unknown':
-#             if conditioned_label == 0:
-#                 conf_matrix[0,1] += 1
-#             else:
-#                 conf_matrix[1,0] += 1
-#         elif conditioned_label == lookup_label:
-#             conf_matrix[conditioned_label, lookup_label] += 1
-#         elif conditioned_label==0 and lookup_label == 1:
-#             # conf_matrix[1,0] += 1
-#             conf_matrix[0, 1] += 1
-#         elif conditioned_label==1 and lookup_label == 0:
-#             # conf_matrix[0,1] += 1
-#             conf_matrix[1, 0] += 1
-#         else:
-#             raise('Error creating conf matrix')
-#     return conf_matrix
-
 def real_data_target(size):
     '''
     Tensor containing ones, with shape = size
@@ -490,123 +437,6 @@ def fake_data_target(size):
     return data
 
 
-# Following two functions are for printing pixelated EES
-# Ex: plt.imshow(eightfold_sym2(oct2array(octant_of_data)),cmap='Greys',clim=[0,1])
-def oct2array(octList, even_flag=False, side=None):
-    """converts list of octant values to square array,
-    size is determined by length of the octant values and the even_flag
-    """
-    if side is None:
-        side = parDim2side(len(octList), even_flag=even_flag)  # side is 9 for 15 pixels
-    c1 = side // 2
-    c2 = int((side + 1) // 2)
-
-    # mask=np.concatenate(([np.concatenate((np.zeros(side-1-k),np.ones(k+1))) for k in range(c2)],np.zeros((c1,r))))
-    return np.concatenate(([np.concatenate(
-        (np.zeros(side - 1 - k), octList[(k * (k + 1)) // 2:((k + 2) * (k + 1)) // 2])) for k in range(c2)],
-                           np.zeros((c1, side))))
-
-
-def eightfold_sym2(array_in):
-    """produces array with 8 fold symmetry based on the contents of the first octant of  array_in
-    Added support for even length sides
-    """
-    array = array_in.copy()
-    r = array.shape[0]
-    c1 = r // 2
-    c2 = (r + 1) // 2
-
-    mask = np.concatenate(
-        ([np.concatenate((np.zeros(r - 1 - k), np.ones(k + 1))) for k in range(c2)], np.zeros((c1, r))))
-
-    marray = array * mask
-    # print(marray)
-    marray += np.rot90(np.rot90(np.transpose(marray)))
-    for k in range(c2):
-        marray[c2 - 1 - k, c1 + k] /= 2
-    # print(marray)
-    marray += np.fliplr(marray)
-    if np.mod(r, 2) == 1:
-        for k in range(c2):
-            marray[k, c2 - 1] /= 2
-        # print(marray)
-    marray += np.flipud(marray)
-    if np.mod(r, 2) == 1:
-        for k in range(r):
-            marray[c2 - 1, k] /= 2
-    return marray
-
-
-def parDim2side(par_dim, even_flag=False):
-    """given the length of the octant paramatrisation returns the size of the symmetric square array
-    since there is an ambiguity in this mapping because some squares
-    have the same size octant representation a flag for even of odd needs to be set
-    """
-    side = int(-2 + np.sqrt(1 + 8 * par_dim))
-    if even_flag:
-        side += 1
-    return (side)
-
-
-# def save_generation_distribution(ex, epoch, categorization, generator, pixel_to_label):
-#     # num_test_samples = 300000
-#     num_test_samples = 20000
-#     if categorization == 2:
-#         test_noise, labels_of_test_noise = create_test_samples(categorization, num_test_samples=num_test_samples)
-#         test_images = generator(test_noise, labels_of_test_noise).data.cpu().numpy()
-#         test_images = np.where(test_images > 0.5, 1, 0)  # convert to binary output
-#
-#         conditioned_labels, lookup_labels, total_unknowns_Hp,total_unknowns_Lp = predict_test_samples(
-#             test_images,
-#             labels_of_test_noise,
-#             categorization,
-#             pixel_to_label)
-#
-#         accuracy_matrix = create_accuracy_matrix(conditioned_labels, lookup_labels)
-#         print('accuracy_matrix out of 20000', accuracy_matrix)
-#
-#         pixel_to_sum = {pixel:0 for pixel in pixel_to_label} # Count number of times each pixel appeared
-#         for test_image in test_images:
-#             test_image = test_image.reshape((test_image.shape[0], -1)).astype(int)
-#             test_image = test_image[0]
-#             if tuple(test_image) in pixel_to_sum:
-#                 pixel_to_sum[tuple(test_image)] += 1
-#
-#         class_dict = {}
-#         for pixel, label in pixel_to_label.items():
-#             if tuple(label) not in class_dict:
-#                 class_dict[tuple(label)] = []
-#             class_dict[tuple(label)].append(pixel_to_sum[pixel])
-#
-#         print('Generated class distribution: ')
-#         for aclass in class_dict:
-#             print(aclass, ': ', len(class_dict[aclass]))
-#
-#         # key = list(class_dict.keys())[0]
-#         # num_label = len(class_dict[key])
-#         # plt.bar([i for i in range(0, num_label)], class_dict[key])
-#         # plt.show()
-#
-#         start=0
-#         my_colors = 'rgbkymcr'
-#         for idx, aclass in enumerate(class_dict):
-#             num_label = len(class_dict[aclass])
-#             plt.bar([i for i in range(start, start+num_label)], class_dict[aclass], color=my_colors[idx])
-#             start += num_label
-#             # What percentage of possible configurations are generated
-#             unique_generated = sum([1 for val in class_dict[aclass] if val > 0])
-#             print('Configurations generated for class: ', aclass, ' is :',
-#                   unique_generated, 'out of: ', num_label)
-#             ex.log_scalar(aclass, unique_generated, epoch)
-#         id = ex.current_run._id
-#         plt.savefig('logs/{}/generated_class_distribution_{}_samples.png'.format(id, num_test_samples))
-#         with open('logs/{}/class_distribution.pickle'.format(id), 'wb') as handle:
-#             pickle.dump(class_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
-#         return
-#
-#
-#     else:
-#         return
 #
 def save_generation_distribution(ex, epoch, categorization, cat_names, generator, pixel_to_label, num_condition,
                                  full_image, pixel_len, Quarter_Fill, zdim,
@@ -710,13 +540,7 @@ def save_generation_distribution(ex, epoch, categorization, cat_names, generator
     class_dict_quad = {}
     class_dict_pixels = {}
     class_dict_pixels_quad = {}
-    # print('keys', pixel_to_sum_convert.keys())
-    # print('values', pixel_to_sum_convert.values())
-    #
-    #
-    # print('keys quad', pixel_to_sum_quad_convert.keys())
-    # print('values quad', pixel_to_sum_quad_convert.values())
-    # print('pixel', len(pixel_to_label), len(pixel_to_label_new), len(pixel_to_label_new_quad))
+   
     for pixel, label in pixel_to_label.items():
         if tuple(np.array(label)) not in class_dict:
             class_dict[tuple(np.array(label))] = []
@@ -770,11 +594,7 @@ def save_generation_distribution(ex, epoch, categorization, cat_names, generator
             unique_generated = sum([1 for val in class_dict_quad[aclass] if val > 0])
             ex.log_scalar(str(aclass) + 'quad', unique_generated, epoch)
 
-    # key = list(class_dict.keys())[0]
-    # num_label = len(class_dict[key])
-    # plt.bar([i for i in range(0, num_label)], class_dict[key])
-    # plt.show()
-
+  
     start = 0
     for idx, aclass in enumerate(class_dict):
         num_label = len(class_dict[aclass])
@@ -812,24 +632,13 @@ def save_generation_distribution(ex, epoch, categorization, cat_names, generator
 
             ex.log_scalar(','.join([str(i) for i in aclass]), unique_generated, epoch)
 
-        id = ex.current_run._id
-        # plt.savefig('logs/{}/generated_class_distribution_{}_samples_quad.png'.format(id, num_test_samples))
-        # plt.clf()
-        # with open('logs/{}/class_distribution_quad.pickle'.format(id), 'wb') as handle:
-        #     pickle.dump(class_dict_quad, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-        # Histogram of a histogram
+     
         freq_every_pixel = [freq for aclass in class_dict_quad for freq in class_dict_quad[aclass]]
         count_freq = defaultdict(lambda: 0)
         for freq in freq_every_pixel:
             count_freq[freq] += 1
 
-        # plt.bar(list(count_freq.keys()), list(count_freq.values()))
-        # plt.ylim(0, 50)
-        # plt.xlim(0, 1000)
-        # plt.title('Histogram of the generated class distribution')
-        # plt.savefig('logs/{}/hist_of_generated_class_distribution_{}_samples_quad.png'.format(id, num_test_samples))
-        # plt.clf()
+       
         print('{} plots and samples generated in {} seconds.'.format(num_test_samples, time.time() - start_time))
     return
 
