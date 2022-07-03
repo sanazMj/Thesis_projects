@@ -34,7 +34,7 @@ def my_config():
     n_features = 100
     discr_traing_rolls = 1
     # test_noise_dim = 2000
-    dir = '/home/sanaz/Ryerson/Projects/VARNETProject/Results_MNIST/'
+    dir = '/home/Ryerson/Projects/VARNETProject/Results_MNIST/'
 @ex.automain
 def main(Model, Model_structure, Model_type, model_kind, num_condition, mode_collapse, img_size, num_epochs, batch_size, num_training_sample, num_test_sample,
           num_runs, n_features, discr_traing_rolls, pac_dim, var_pac, var_coef, dir):
@@ -76,17 +76,6 @@ def main(Model, Model_structure, Model_type, model_kind, num_condition, mode_col
         print('epoch', epoch)
         D_losses = []
         G_losses = []
-
-        # learning rate decay
-        # if (epoch + 1) == 11:
-        #     G_optimizer.param_groups[0]['lr'] /= 10
-        #     D_optimizer.param_groups[0]['lr'] /= 10
-        #     print("learning rate change!")
-        #
-        # if (epoch + 1) == 16:
-        #     G_optimizer.param_groups[0]['lr'] /= 10
-        #     D_optimizer.param_groups[0]['lr'] /= 10
-        #     print("learning rate change!")
 
 
         epoch_start_time = time.time()
@@ -177,10 +166,6 @@ def main(Model, Model_structure, Model_type, model_kind, num_condition, mode_col
             # evaluation(2000, num_test_sample, generator, classifier, img_size, prob)
             evaluation(100, num_test_sample, generator, classifier, img_size, prob)
 
-        # train_hist['D_losses'].append(torch.mean(torch.FloatTensor(D_losses)))
-        # train_hist['G_losses'].append(torch.mean(torch.FloatTensor(G_losses)))
-        # train_hist['V_losses'].append(torch.mean(torch.FloatTensor(V_losses)))
-        #
         train_hist['per_epoch_ptimes'].append(per_epoch_ptime)
         #
     end_time = time.time()
