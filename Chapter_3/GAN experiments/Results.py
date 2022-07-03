@@ -87,18 +87,13 @@ def check_tumor(ids, files_epoch, neme_data, dir='/home/sanaz/Ryerson/Projects/t
             check_files_convexity(file, neme_data, id_name=str(id) + '_' + str(files_epoch[index]),save_omega=save_omega)
 
 
-# files = [162,163,164,165] #list(range(1,162))
 keys_access = ['GAN_model', 'd_thresh','beta','mode_collapse', 'pac_num', 'filled', 'num_epochs', 'noise_dim', 'learning_rate_g',
                'learning_rate_d',
                'target_points', 'dataset_kind', 'dataset_include_tumor',
                'dataset_size', 'size_wanted', 'shape', 'batch_size',
                'step_report', 'softSparsity', 'diversity', 'connectedFlag', 'space_dim', 'in_channels_dim',
                'dimension', 'itr_critic']
-# report_results(files, '162_165')
-# dir = '/home/sanaz/Ryerson/Projects/tumorGAN/GAN_simple_3D/logs/'
-dir = '/home/sanaz/Ryerson/Projects/tumorGAN/dbraingen_master/logs/'
-# dir = '/home/sanaz/Ryerson/Projects/tumorGAN/GAN_simple_3D/logs/'
-# files =
+
 dataset_include_tumor = True
 step_report = 100
 num_epoch = 500
