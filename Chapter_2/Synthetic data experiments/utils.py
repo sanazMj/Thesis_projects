@@ -228,29 +228,6 @@ def train_generator(optimizer, discriminator, criterion, fake_data):
     return error, prediction
 
 
-# def train_varnet(optimizer, varnet, criterion, real_data, fake_data):
-#     optimizer.zero_grad()
-#
-#     # print('v',real_data.shape, fake_data.shape)
-#
-#     n = real_data.shape[0]
-#     m = fake_data.shape[0]
-#     # print(n,m)
-#
-#     prediction_real = varnet(real_data)
-#     # print(prediction_real.shape, make_ones(n).shape)
-#     error_real = criterion(prediction_real, make_ones(n))
-#     error_real.backward()
-#
-#     # print(fake_data.shape)
-#     prediction_fake = varnet(fake_data)
-#     # print(prediction_fake.shape, make_zeros(m).shape)
-#     error_fake = criterion(prediction_fake, make_zeros(m))
-#
-#     error_fake.backward()
-#     optimizer.step()
-#
-#     return error_real + error_fake, prediction_real, prediction_fake
 def train_varnet(optimizer, varnet, criterion, real_data_reshape, total_label_diff, real_data, num_var, pac_var, batch_size, n_mixture, same_creation_type):
     optimizer.zero_grad()
 
@@ -264,28 +241,12 @@ def train_varnet(optimizer, varnet, criterion, real_data_reshape, total_label_di
     else:
         prediction_real = varnet(real_data_reshape[0],real_data_reshape[1], real_data_reshape[2] )
         error_real = criterion(prediction_real, total_label_diff)
-    # print(prediction_real.shape, make_ones(n).shape)
-    # print(make_ones(n))
-    # print(prediction_real)
-    # print(criterion(prediction_real, make_ones(n)))
+   
     error_real.backward()
 
 
     error_fake = 0.0
-    # num_var = get_divisibles(batch_size)
-    # print(num_var)
-    # if same_creation_type == 0:
-    #     num_var = [1,2,4,5,10,20,25,50,100]
-    # elif same_creation_type == 1:
-    #     num_var = [1,2,4,5,10,20,25,50]
-    # elif same_creation_type == 2:
-    #     num_var = [1,2,4,5,10,20,25]
-    # if n_mixture == 8:
-    #     num_var = [1, 2, 4]
-    # elif n_mixture == 25:
-    #     num_var = [1, 5, 10, 20]
-    # elif n_mixture == 36:
-    #     num_var = [1, 2, 4, 8, 12, 16, 18, 24]
+    
     if same_creation_type == 0 or same_creation_type == 1:
         fake_data_same, label = create_sim_data(real_data,batch_size, pac_var, n_mixture, type=same_creation_type )
         prediction_fake = varnet(fake_data_same)
@@ -296,19 +257,7 @@ def train_varnet(optimizer, varnet, criterion, real_data_reshape, total_label_di
         prediction_fake = varnet(fake_data_same[0], fake_data_same[1],fake_data_same[2])
         # print(prediction_fake.shape, label.shape)
         error_fake += criterion(prediction_fake, label)
-    # print(num_var)
-    # fake_data_same, label = create_sim_data(real_data,  num_var[np.random.randint(0,len(num_var)-1,1)[0]],batch_size, type=same_creation_type )
-    # num_var = [1, 2, 4, 5]
-    # fake_data_same, label = create_sim_data(real_data, 1)
-        # print(fake_data_same.shape, label.shape)
-
-
-    # print(label, label.type)
-    # print(prediction_fake)
-    # print(criterion(prediction_fake, label))
-    # print(fake_data.shape)
-
-
+    
     error_fake.backward()
     optimizer.step()
 
@@ -438,12 +387,6 @@ def create_sim_data_new(imgs, batch_size, pac_var, n_mixture, type = 0):
         # print(label.shape, total_label.shape, fake_data_list[i].shape)
     total_label = total_label.cuda()
 
-    #
-    # fake_data_same_reshape = fake_data_same.reshape(fake_data_same.shape[0] // pac_var,fake_data_same.shape[1] * pac_var)
-    # fake_data_same_reshape = fake_data_same_reshape.cuda()
-    # print(nums)
-    # print(fake_data_list[0].shape, fake_data_list[1].shape, fake_data_list[2].shape, total_label.shape)
-    # print(total_label)
 
     return fake_data_list, total_label
 
