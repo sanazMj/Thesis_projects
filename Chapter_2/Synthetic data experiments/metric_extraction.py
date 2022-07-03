@@ -2,7 +2,7 @@
 import numpy as np
 # import pandas as pd
 # import os
-path = '/home/sanaz/Ryerson/Projects/VARNETProject/Synthetic_data/logs/'
+path = '/home/Projects/VARNETProject/Synthetic_data/logs/'
 # files =[154,155,156]
 files = list(range(562,565))
 
