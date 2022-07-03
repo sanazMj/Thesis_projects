@@ -32,7 +32,7 @@ def my_config():
     discr_traing_rolls = 1
     test_noise_dim = 2000
     minibatch_net = False
-    dir = '/home/sanaz/Ryerson/Projects/VARNETProject/Results/'
+    dir = '/home/Projects/VARNETProject/'
 @ex.automain
 def main(Model, Model_structure, Model_type, model_kind, mode_collapse, dataset, num_epochs, batch_size, training_samples, test_samples,
           num_runs, n_mixture, n_features, discr_traing_rolls, test_noise_dim, pac_dim, dir, minibatch_net):
@@ -90,9 +90,7 @@ def main(Model, Model_structure, Model_type, model_kind, mode_collapse, dataset,
             g_error += g_error_batch
 
 
-        # num_mode, KL, JSD_score, KL_nonthresh, JSD_score_nonthresh, high_quality_samples = evaluate_modes_reverse_KL(
-        #     generator, 1000, q, q_without_thresh, n_mixture, tensor_loc, label, std_dev=std_dev)
-
+        
         g_losses.append(g_error / (i))
         d_losses.append(d_error / (i))
         print('Epoch {}: g_loss: {:.8f} d_loss: {:.8f}\r'.format(epoch, g_error / (i+1), d_error / (i+1)))
@@ -101,16 +99,7 @@ def main(Model, Model_structure, Model_type, model_kind, mode_collapse, dataset,
             generator, test_noise_dim, q, q_without_thresh, n_mixture, tensor_loc, label, std_dev=std_dev)
 
         if epoch>1 and epoch % 50 == 0:
-            print(epoch, '%50')
-            img = generator(test_noise).cpu().detach()
-            plt.figure()
-            plt.scatter(trainset[:, 0], trainset[:, 1], c='b', edgecolor='none')
-            plt.scatter(img[:, 0], img[:, 1], c='g', edgecolor='none')
-            plt.savefig(dir + '/Images/id_' + str(id) + '_epoch_' + str(epoch) + '.png')
-            # torch.save(generator.state_dict(), dir + '/Models/generator_' + str(id)+'.pt')
 
-           
-            # Evaluate
             num_mode, KL, JSD_score, KL_nonthresh, JSD_score_nonthresh, high_quality_samples = evaluate_modes_reverse_KL(
                 generator, test_samples, q, q_without_thresh, n_mixture, tensor_loc, label, std_dev=std_dev)
 
