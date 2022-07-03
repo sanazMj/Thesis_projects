@@ -88,7 +88,7 @@ def main(batch_size,channels,n_critic,compare,
                                                                         prepadding_width=prepadding_width,
                                                                         lookup=True, balance=dataset_Balance)
     args = [channels, Channel_factor, Kernel_factor, zdim,  dataset['num_features'], dataset['num_condition'], dataset['num_pixels']]
-    print( dataset['num_features'], dataset['num_condition'], dataset['num_pixels'])
+
     if mode_collapse == 'Minibatch' and Model_structure == 'FF':
         minibatch_net = MinibatchDiscrimination(ndf//4, ndf//8, 5, Minibatch_kind='L1 Norm')
         minibatch_net.cuda()
@@ -115,7 +115,6 @@ def main(batch_size,channels,n_critic,compare,
 
     else:
         test_noise, labels_of_test_noise = create_test_samples(dataset['num_condition'], dataset['num_condition'], False, zdim, test_samples_per_category=500)
-    print(test_noise.shape, labels_of_test_noise.shape)
     if full_image:
         pixel = Pixel_Full
     else:
@@ -192,16 +191,10 @@ def main(batch_size,channels,n_critic,compare,
                 save_generation_distribution(ex, epoch, categorization, cat_names, generator, pixel_to_label,
                                              dataset['num_condition'], full_image, pixel, Quarter_fill, zdim,
                                              plot_generated_distribution=True)
-        if epoch == 399:
+        if epoch == num_epochs-1:
                 print('training finished')
-            #     # logger.save_images(test_images, conditioned_labels, lookup_labels, epoch, full_image,partial_2fold,pixel)
                 if epoch == num_epochs - 1 and pixel_to_label:
-                    # utils.save_generation_distribution(ex, epoch, categorization, generator, pixel_to_label)
                     save_generation_distribution(ex, epoch, categorization, cat_names, generator, pixel_to_label,
                                                         dataset['num_condition'], full_image, pixel, Quarter_fill,zdim,
                                                         plot_generated_distribution=True)
-                break
-        # logger.log_metrics(ex, class_accuracies, class_accuracies_quad, class_accuracies_without_unknowns,
-        #                    class_accuracies_without_unknowns_quad, epoch, num_unknowns)
-
 
