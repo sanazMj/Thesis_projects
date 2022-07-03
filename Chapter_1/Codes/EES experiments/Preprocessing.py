@@ -1,12 +1,10 @@
 import pandas as pd
 import numpy as np
-# import utils1
 import torch
 from sklearn.utils import shuffle
 import pickle
 from Utils.utils_image_edit import *
 from Utils.utils_def import *
-from Utils.population_generator_utils import *
 from Utils.utils_log import *
 def read_ees_dataset(categorization, batch_size, full_image, partial_2fold, Pixel_Full, Quarter_fill, prepadding,
                             prepadding_width, lookup=False, dir='Synthetic_data_binary/', balance=False):
@@ -19,7 +17,6 @@ def read_ees_dataset(categorization, batch_size, full_image, partial_2fold, Pixe
 
         @categorization specifies how to create the labels
         2: high pass low pass
-
 
     """
     dataset = {}
@@ -39,14 +36,11 @@ def read_ees_dataset(categorization, batch_size, full_image, partial_2fold, Pixe
         L_min = (Pixel_Full-1)//2
 
     elif categorization == 8:  # kmeans 8 cats
-        # pixels = pd.read_csv(dir + 'pixels.txt', header=None, sep=' ').values
-        Main = '/home/sanaz/Ryerson/Projects/GAN_Main_Project/Synthetic_data_binary/'
+        Main = '/home/Projects/Synthetic_data_binary/'
 
         with open(Main + "data_partial" + str(9) + ".pkl", 'rb') as f:
             pixels = pickle.load(f)
         pixels = np.array(list(pixels.keys()), dtype=np.uint8)
-        # preprocessed file generated using exploration/k_means.ipnyb
-
         preds_dict = pickle_load(Main + '6_8_4categories/9x9_8_cats_kmeans_preds.pickle')
         one_hot_labels = preds_dict['preds']  # uint8 dtype
         labels = torch.from_numpy(one_hot_labels).type(torch.FloatTensor)
@@ -57,8 +51,7 @@ def read_ees_dataset(categorization, batch_size, full_image, partial_2fold, Pixe
 
     elif categorization == 2.1 or categorization == 2.2 or categorization == 2.3:
         bit_num = int((Pixel_Full//2 + 1)*(Pixel_Full//2+2)//2)
-        data = np.load(dir + 'DatabaseLPandHP_Side'+str(Pixel_Full)+'_Bits'+str(bit_num)+'_TotalCount100000_LPcount50.0_HPcount50.0.npz') # 39x39
-        # data = np.load(dir +'preprocessed_data/DatabaseLPandHP_Side39_Bits210_TotalCount1000000_LPcount50.0_HPcount50.0.npz') #19x19
+        data = np.load(dir +'preprocessed_data/DatabaseLPandHP_Side39_Bits210_TotalCount1000000_LPcount50.0_HPcount50.0.npz') #19x19
         pixels = np.array(data['Data'], dtype=np.uint8)
         TRANSFER_FUNCTIONS = data['Labels']
         pixels, TRANSFER_FUNCTIONS = shuffle(pixels, TRANSFER_FUNCTIONS, random_state=0)
@@ -88,9 +81,6 @@ def read_ees_dataset(categorization, batch_size, full_image, partial_2fold, Pixe
 
     else:
         raise ValueError('Error: categorization value')
-    # if filter_indexes:
-
-
 
 
     if full_image: # Convert 1/8 to full image
@@ -99,8 +89,6 @@ def read_ees_dataset(categorization, batch_size, full_image, partial_2fold, Pixe
             complete_pixels = np.stack(
                 [eightfold_sym2(oct2array(list_pixel_keys[i])) for i in range(len(pixels))])
             if prepadding:
-
-                # complete_pixels_list = complete_pixels.reshape((complete_pixels.shape[0], -1)).astype(int)
 
                 complete_pixels = Prepadding_images(complete_pixels, True, prepadding_width)
                 dataset['complete_pixels'] = torch.Tensor(complete_pixels)
@@ -114,9 +102,6 @@ def read_ees_dataset(categorization, batch_size, full_image, partial_2fold, Pixe
             complete_pixels = np.stack(
                 [eightfold_sym2(oct2array(pixels[i])) for i in range(len(pixels))])
             if prepadding:
-
-                # complete_pixels_list = complete_pixels.reshape((complete_pixels.shape[0], -1)).astype(int)
-
                 complete_pixels = Prepadding_images(complete_pixels, True, prepadding_width)
                 dataset['complete_pixels'] = torch.Tensor(complete_pixels)
                 data = torch.utils.data.TensorDataset(dataset['complete_pixels'], labels)
@@ -181,10 +166,6 @@ def read_ees_dataset(categorization, batch_size, full_image, partial_2fold, Pixe
                     fold_2pixels = fold_2pixels.reshape((fold_2pixels.shape[0], -1)).astype(int)
                     dataset['fold_2pixels'] = torch.Tensor(fold_2pixels)
                     data = torch.utils.data.TensorDataset(dataset['fold_2pixels'], labels)
-
-
-
-
 
     data_loader = torch.utils.data.DataLoader(data, batch_size=batch_size, shuffle=True)
     dataset['num_batches'] = len(data_loader)
