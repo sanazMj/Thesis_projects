@@ -37,7 +37,7 @@ def my_config():
     test_noise_dim = 2000
     type_same = 2
     same = False
-    dir = '/home/sanaz/Ryerson/Projects/VARNETProject/Results_MNIST/'
+    dir = '/home//Projects/VARNETProject/Results_MNIST/'
 @ex.automain
 def main(Model, Model_structure, Model_type, model_kind, mode_collapse, img_size, num_epochs, batch_size, num_training_sample, num_test_sample,
           num_runs, type_same, same, n_features, discr_traing_rolls, pac_dim, var_pac, var_coef, dir,test_noise_dim):
@@ -110,9 +110,6 @@ def main(Model, Model_structure, Model_type, model_kind, mode_collapse, img_size
             D_real_loss = loss(D_result, y_real_)
 
             z_ = torch.randn((mini_batch, 100))
-            # y_ = (torch.rand(mini_batch, 1) * 10).type(torch.LongTensor).squeeze()
-            # y_label_ = onehot[y_]
-            # y_fill_ = fill[y_]
             z_ = Variable(z_.cuda())
             G_result = generator(z_)
             G_result_reshaped = G_result.reshape(G_result.shape[0] // pac_dim, G_result.shape[1] * pac_dim,
@@ -129,8 +126,6 @@ def main(Model, Model_structure, Model_type, model_kind, mode_collapse, img_size
             D_optimizer.step()
             D_losses.append(D_train_loss.item())
 
-            # print(D_train_loss.item())
-            # D_losses.append(D_train_loss.data[0])
             ######################################################
             # train varnet V
             x_reshaped = x_.reshape(x_.shape[0] // var_pac, x_.shape[1] * var_pac, x_.shape[2], x_.shape[3])
@@ -174,9 +169,6 @@ def main(Model, Model_structure, Model_type, model_kind, mode_collapse, img_size
             generator.zero_grad()
 
             z_ = torch.randn((mini_batch, 100))
-            # y_ = (torch.rand(mini_batch, 1) * 10).type(torch.LongTensor).squeeze()
-            # y_label_ = onehot[y_]
-            # y_fill_ = fill[y_]
             z_ = Variable(z_.cuda())
 
             G_result = generator(z_)
@@ -206,10 +198,6 @@ def main(Model, Model_structure, Model_type, model_kind, mode_collapse, img_size
         evaluation(100, 2000, generator, classifier, img_size, prob)
         print('test each  epoch on 2000')
 
-        # train_hist['D_losses'].append(torch.mean(torch.FloatTensor(D_losses)))
-        # train_hist['G_losses'].append(torch.mean(torch.FloatTensor(G_losses)))
-        # train_hist['V_losses'].append(torch.mean(torch.FloatTensor(V_losses)))
-        #
         train_hist['per_epoch_ptimes'].append(per_epoch_ptime)
         #
         if epoch >1 and epoch % 5 == 0:
