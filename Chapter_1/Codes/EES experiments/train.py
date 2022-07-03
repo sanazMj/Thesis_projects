@@ -46,36 +46,20 @@ def train_generator(discriminator, loss_dict, optimizer, fake_data, z_noise, Dis
         # noise_w = 5  # diversity encouraging term
         B = int(fake_data.size(0) / 2)
         noise = z_noise
-        # criterionFeat = torch.nn.L1Loss().cuda()
-        # feat_weights = 4.0 / (opt.n_layers_D + 1)
-        # D_weights = 1.0 / 1
-        # for i in range(1):
-        #     for j in range(len(D_result[i]) - 1):
-        #         g_feat += D_weights * feat_weights * \
-        #                   criterionFeat(D_result[i][j], pred_real[i][j].detach()) * opt.feat_w
-
-        # noise sensitivity loss
+       
         if dist_measure == 'rgb':
             g_noise_out_dist = torch.mean(torch.abs(fake_data[:B] - fake_data[B:]))
-        # elif dist_measure == 'perceptual':
-        #     g_noise_out_dist = 0
-        #     for i in range(opt.num_D):
-        #         for j in range(len(pred_fake[i]) - 1):
-        #             g_noise_out_dist += D_weights * feat_weights * \
-        #                                 torch.mean(torch.abs(pred_fake[i][j][:B] - pred_fake[i][j][B:]).view(B, -1),
-        #                                            dim=1)
-
+       
         g_noise_z_dist = torch.mean(torch.abs(noise[:B] - noise[B:]).view(B, -1), dim=1)
-        # G_noise = torch.exp(-torch.mean(g_noise_out_dist / g_noise_z_dist) * noise_w)
         G_noise = torch.mean(g_noise_out_dist / g_noise_z_dist) * noise_w
 
-    # print('g',G_noise)
+
     if loss_sym:
         error_sym = loss_sym(fake_data)
     else:
         error_sym = 0
     error = error_sym + error_BCE - G_noise
-    # error = error_sym + error_BCE + G_noise
+
     error.backward()
     # Update weights with gradients
     optimizer.step()
